@@ -1,28 +1,45 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
 import { exerciseOptions, fetchData } from '../utils/fetchData';
+import HorizontalScrollbar from "./HorizontalScrollbar";
 
-const SearchExercises = () => {
+const SearchExercises = ({setExercises, bodyPart, setBodyPart}) => {
 
     const [search, setSearch] = useState('')
-    // const [exercises, setExercises] = useState([])
+    
+    const [bodyParts, setBodyParts] = useState([]);
+
     const url = "https://exercisedb.p.rapidapi.com/exercises";
+
+    useEffect(() => {
+        const fetchExercisesData = async () => {
+            const bodyPartsData = await fetchData(
+              "https://exercisedb.p.rapidapi.com/exercises/bodyPartList",
+              exerciseOptions
+            );
+
+            setBodyParts(["all", ...bodyPartsData]);
+        }
+
+        fetchExercisesData();
+    }, [])
 
     const handleSearch = async () => {
         if(search) {
             const exercisesData = await fetchData(url, exerciseOptions);
-            console.log(exercisesData)
-            // const searchedExercises = exercisesData.filter(
-            //   (item) =>
-            //     item.name.toLowerCase().includes(search) ||
-            //     item.target.toLowerCase().includes(search) ||
-            //     item.equipment.toLowerCase().includes(search) ||
-            //     item.bodyPart.toLowerCase().includes(search)
-            // );
+            // console.log(exercisesData)
+            const searchedExercises = exercisesData.filter(
+              (item) =>
+                item.name.toLowerCase().includes(search) ||
+                item.target.toLowerCase().includes(search) ||
+                item.equipment.toLowerCase().includes(search) ||
+                item.bodyPart.toLowerCase().includes(search),
+            );
 
-            // setSearch('')
-            // setExercises(searchedExercises)
+            setSearch('')
+            setExercises(searchedExercises);
+            // console.log(searchedExercises)
         }
     }
 
@@ -66,6 +83,9 @@ const SearchExercises = () => {
         >
           Search
         </Button>
+      </Box>
+      <Box sx={{ position: "relative", width: "100%", p: "20px" }}>
+        <HorizontalScrollbar data={bodyParts} bodyPart={bodyPart}  setBodyPart={setBodyPart}/>
       </Box>
     </Stack>
   );
